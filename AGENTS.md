@@ -4,7 +4,7 @@ The in-game half of WatchWolf: a **Spigot plugin** that opens a socket and execu
 petitions against the live server (place blocks, spawn entities, run commands, read inventories,
 record video, pull timings…).
 
-`dev.watchwolf:watchwolf-server` · **Java 8** · Maven · DST `0b001` in the
+`dev.watchwolf:watchwolf-server` · **Java 8 bytecode** · Gradle · DST `0b001` in the
 [WatchWolf protocol](https://github.com/watch-wolf/WatchWolf).
 Pre-compiled builds: <https://watchwolf.dev/versions/>.
 
@@ -51,26 +51,20 @@ src/main/java/dev/watchwolf/
 ## Build
 
 ```bash
-./ci/build.sh --preclean
+./gradlew assemble
 ```
 
-Runs `mvn compile assembly:single` inside `maven:3.8.4-openjdk-8`; the artifact lands in
-`target/` named **`WatchWolf-<version>-1.8-LATEST.jar`** (`finalName` in `pom.xml`). That
+Runs Gradle with a Java 17+ JDK; the artifact lands in
+`build/libs/` named **`WatchWolf-<version>-1.8-LATEST.jar`**. That
 `-<minMc>-<maxMc>` suffix is the naming convention the ServersManager's `usual-plugins/` folder
 expects, so the jar can be copied straight there.
 
-### Dependencies you must provide
+### Dependencies
 
-`lib/` is gitignored; put these in place before building:
-
-- `lib/spigot-1.16.5.jar` — compiled against the 1.16.5 API, but the plugin is expected to run on
-  **1.8 through the latest**, hence XSeries and the reflection/adapters under `worldguard/`,
-  `timings/` and `utils/`.
-- `lib/watchwolf-core-0.3.3.jar` — shared petitions, entities, and socket serialization.
-
-The Core jar is installed into `~/.m2` by the default `local-ww-core-profile` during the
-**`clean`** phase, which is why `--preclean` matters after swapping it. The Spigot jar is read
-directly from `lib/` as a system dependency.
+Gradle resolves the Spigot 1.16.5 API as `compileOnly` and Core 0.3.3 plus XSeries as shaded
+dependencies. No local Spigot server JAR or Core JAR is required. The plugin is expected to run on
+**1.8 through the latest**, using XSeries and the reflection/adapters under `worldguard/`,
+`timings/` and `utils/`.
 
 ## Conventions and gotchas
 

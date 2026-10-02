@@ -44,42 +44,39 @@ between Spigot and Paper implementations at runtime.
 
 ## Compile
 
-Use **Java 8**.
+Use a JDK supported by Gradle 9 (Java 17 or newer). The compiled plugin targets **Java 8**.
 
 ```bash
-./ci/build.sh --preclean
+./gradlew assemble
 ```
 
-The build runs inside `maven:3.8.4-openjdk-8`, so no local JDK or Maven is needed. The artifact is
+On Windows, use `gradlew.bat assemble`. The shaded artifact is
 named `WatchWolf-<version>-1.8-LATEST.jar` — that `-<minMc>-<maxMc>` suffix is the naming
 convention the ServersManager's `usual-plugins/` folder expects, so the jar can be copied straight
 across.
 
 ### Dependencies
 
-`lib/` is gitignored. Provide the Spigot API jar before building:
+Gradle resolves `spigot-api:1.16.5-R0.1-SNAPSHOT` from the Spigot snapshots repository. It is a
+compile-only dependency: Minecraft supplies the API at runtime. This plugin does not import NMS or
+CraftBukkit classes, so building it needs no local Spigot server JAR. Gradle resolves
+`WatchWolf-Core:0.3.3` and `XSeries:9.9.0` from JitPack and shades them into the plugin JAR.
+ServersManager now defaults to the itzg runtime, which downloads the requested supported Paper
+version when an instance starts. Prebuilt server JARs under `server-types/` are needed only when
+the explicit `legacy` fallback is selected.
 
-- `lib/spigot-1.16.5.jar` — spigot 1.16.5
-
-Core is resolved as `com.github.watch-wolf:WatchWolf-Core` from JitPack, using Maven's local
-cache. Set the required version with `watchwolf-core.version` in `pom.xml`. If resolution fails,
-`ci/install-core.sh` builds the sibling `../WatchWolf-Core` checkout and installs it under the
-same coordinates. Its version must match the requested version; the checkout is left unchanged.
-Both build and publish run this helper automatically. A Core jar in `lib/` is no longer needed.
-
-Maven pulls `com.github.cryptomorin:XSeries` on its own; it is what keeps the plugin working
+XSeries keeps the plugin working
 across every Minecraft version despite compiling against the 1.16.5 API.
 
 ### Publish to GitHub Packages
 
-Configure server `github` in `~/.m2/settings.xml` with your GitHub username and a classic personal
-access token with `write:packages` and access to `miranda1000/WatchWolf-Server`, then run:
+Set `GITHUB_ACTOR` and `GITHUB_TOKEN` (with package publish access), then run:
 
 ```bash
 ./ci/publish.sh
 ```
 
-This builds and deploys to `https://maven.pkg.github.com/miranda1000/watchwolf-server` using Docker.
+This publishes the shaded JAR to `https://maven.pkg.github.com/miranda1000/watchwolf-server`.
 
 ## Testing
 
