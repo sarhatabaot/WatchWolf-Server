@@ -1,8 +1,8 @@
 name: Release WatchWolf-Server plugin
 
 on:
-  push:
-    tags: ['v*']
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -20,18 +20,17 @@ jobs:
         run: ./gradlew --no-daemon clean assemble
       - name: Check release tag against artifact version
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           [[ "$RELEASE_TAG" == v* ]]
           version="${RELEASE_TAG#v}"
           test -s "build/libs/WatchWolf-${version}-1.8-LATEST.jar"
-      - name: Create plugin release with JAR and checksum
+      - name: Upload plugin JAR and checksum to published release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           version="${RELEASE_TAG#v}"
           artifact="WatchWolf-${version}-1.8-LATEST.jar"
           (cd build/libs && sha256sum "$artifact" > "$artifact.sha256")
-          gh release create "$RELEASE_TAG" "build/libs/$artifact" "build/libs/$artifact.sha256" \
-            --verify-tag --title "$RELEASE_TAG" --generate-notes
+          gh release upload "$RELEASE_TAG" "build/libs/$artifact" "build/libs/$artifact.sha256"
