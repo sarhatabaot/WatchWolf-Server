@@ -70,13 +70,19 @@ across every Minecraft version despite compiling against the 1.16.5 API.
 
 ### Publish to GitHub Packages
 
-Set `GITHUB_ACTOR` and `GITHUB_TOKEN` (with package publish access), then run:
+For a GitHub Release, push tag `v<plugin version>` to this fork. The tag workflow builds the
+shaded Java 8 plugin and creates the release with `WatchWolf-<version>-1.8-LATEST.jar` plus its
+SHA-256 file. Let this workflow create the release so immutable releases are supported. Finish this
+release before the matching ServersManager image release; that image downloads this exact asset.
+
+The optional Maven Packages publication uses this fork's package endpoint. To publish it manually,
+set `GITHUB_ACTOR` and `GITHUB_TOKEN` (with package publish access), then run:
 
 ```bash
 ./ci/publish.sh
 ```
 
-This publishes the shaded JAR to `https://maven.pkg.github.com/miranda1000/watchwolf-server`.
+This publishes the shaded JAR to `https://maven.pkg.github.com/sarhatabaot/WatchWolf-Server`.
 
 ## Testing
 
