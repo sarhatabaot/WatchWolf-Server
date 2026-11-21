@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.watchwolf"
-version = "0.4.2"
+version = "0.4.3"
 
 val coreVersion = "0.3.3"
 
